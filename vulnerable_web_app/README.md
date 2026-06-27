@@ -100,6 +100,7 @@ vulnerable_web_app/
 ├── test_app.py
 ├── test_database.py
 ├── docs/
+│   ├── demo_outputs.md
 │   ├── sql_injection_walkthrough.md
 │   ├── weak_auth_walkthrough.md
 │   └── xss_walkthrough.md
