@@ -33,6 +33,10 @@ Reason:
 
 - Repeated failures from one IP can indicate brute-force or password guessing activity.
 
+Framework mapping:
+
+- [MITRE ATT&CK T1110 - Brute Force](https://attack.mitre.org/techniques/T1110/).
+
 ## Rule: Suspicious Username
 
 Trigger:
@@ -51,6 +55,10 @@ Reason:
 
 - These usernames are commonly targeted during automated scanning or credential attacks.
 
+Framework mapping:
+
+- This rule supports brute-force and credential-guessing triage but is not mapped to a standalone ATT&CK technique by itself.
+
 ## Rule: Success After Failures
 
 Trigger:
@@ -64,6 +72,11 @@ Severity:
 Reason:
 
 - A success after repeated failures can indicate a password guessing attempt that eventually found valid credentials.
+
+Framework mapping:
+
+- [MITRE ATT&CK T1110 - Brute Force](https://attack.mitre.org/techniques/T1110/).
+- [MITRE ATT&CK T1110.001 - Password Guessing](https://attack.mitre.org/techniques/T1110/001/).
 
 ## Current Limitations
 

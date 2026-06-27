@@ -13,6 +13,7 @@ The demos focus on SQL injection in a login form, cross-site scripting in a comm
 - Why plaintext password storage is dangerous.
 - How password hashing protects credentials if a database is exposed.
 - How to document a vulnerability with impact, evidence, and remediation.
+- How local findings can be mapped to OWASP Top 10 categories.
 
 ## Demo Routes
 
@@ -21,6 +22,14 @@ The demos focus on SQL injection in a login form, cross-site scripting in a comm
 | SQL injection | `/vulnerable-login` | `/secure-login` | Parameterized queries |
 | Cross-site scripting | `/vulnerable-comment` | `/secure-comment` | HTML escaping |
 | Password storage | `/weak-auth-login` | `/secure-auth-login` | Password hashing |
+
+## Framework Mapping
+
+| Demo | Reference Category |
+| --- | --- |
+| SQL injection | [OWASP Top 10 A03:2021 - Injection](https://owasp.org/Top10/A03_2021-Injection/) |
+| Cross-site scripting | [OWASP Top 10 A03:2021 - Injection](https://owasp.org/Top10/A03_2021-Injection/) |
+| Weak password storage | [OWASP Top 10 A07:2021 - Identification and Authentication Failures](https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures/) |
 
 ## Setup
 

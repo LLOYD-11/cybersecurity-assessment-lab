@@ -24,6 +24,7 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 - SQL injection: vulnerable query construction vs parameterized queries
 - Cross-site scripting: unsafe rendering vs automatic HTML escaping
 - Password storage: plaintext password storage vs password hashing
+- OWASP Top 10 mapping for each web security demo
 
 ### Module 3: Log-Based Detection
 
@@ -33,6 +34,7 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 - Success-after-failures detection
 - JSON alert export
 - Markdown report generation
+- MITRE ATT&CK mapping for brute-force style detections
 
 ## Reports
 

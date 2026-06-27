@@ -44,6 +44,10 @@ SELECT id, username FROM users WHERE username = '' OR '1'='1' --' AND password =
 
 In a real application, this pattern can allow authentication bypass, unauthorized data access, data modification, or data deletion.
 
+## Framework Mapping
+
+This demo maps to [OWASP Top 10 A03:2021 - Injection](https://owasp.org/Top10/A03_2021-Injection/). OWASP lists SQL injection as a common injection weakness and recommends keeping user input separate from commands and queries.
+
 ## Remediation
 
 The secure login route uses parameterized queries:

@@ -36,6 +36,10 @@ The vulnerable page renders the raw script tag. The secure page renders the same
 
 In a real application, cross-site scripting can allow attackers to run JavaScript in another user's browser, steal session data, modify page content, or perform actions as the victim.
 
+## Framework Mapping
+
+This demo maps to [OWASP Top 10 A03:2021 - Injection](https://owasp.org/Top10/A03_2021-Injection/). OWASP includes cross-site scripting in the injection category because untrusted input can be interpreted by the browser as executable content.
+
 ## Remediation
 
 The secure comment route uses Jinja's default escaping:
