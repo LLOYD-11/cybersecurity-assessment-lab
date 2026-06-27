@@ -10,6 +10,7 @@ from pathlib import Path
 
 FAILED_THRESHOLD = 5
 SUSPICIOUS_USERNAMES = {"admin", "root", "test", "guest"}
+SEVERITY_ORDER = ["critical", "high", "medium", "low"]
 
 LOG_PATTERN = re.compile(
     r"^(?P<timestamp>\S+)\s+"
@@ -42,7 +43,13 @@ def parse_args() -> argparse.Namespace:
         description="Analyze authentication logs for suspicious activity."
     )
     parser.add_argument("log_file", type=Path, help="Path to an authentication log file.")
-    parser.add_argument("--output", type=Path, help="Optional JSON output path.")
+    parser.add_argument("--output", type=Path, help="Optional report output path.")
+    parser.add_argument(
+        "--format",
+        choices=["json", "markdown"],
+        default="json",
+        help="Report output format used with --output. Default: json.",
+    )
     return parser.parse_args()
 
 
@@ -174,13 +181,140 @@ def print_summary(events: list[AuthEvent], alerts: list[Alert]) -> None:
         print(f"{alert.severity:<10} {alert.rule:<26} {alert.ip:<15} {alert.message}")
 
 
-def save_json(output_path: Path, events: list[AuthEvent], alerts: list[Alert]) -> None:
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
+def count_by_alert_field(alerts: list[Alert], field_name: str) -> dict[str, int]:
+    counts: dict[str, int] = defaultdict(int)
+    for alert in alerts:
+        value = getattr(alert, field_name)
+        counts[value] += 1
+    return dict(sorted(counts.items()))
+
+
+def build_report_payload(events: list[AuthEvent], alerts: list[Alert]) -> dict[str, object]:
+    severity_counts = count_by_alert_field(alerts, "severity")
+    ordered_severity_counts = {
+        severity: severity_counts[severity]
+        for severity in SEVERITY_ORDER
+        if severity in severity_counts
+    }
+
+    return {
         "events_analyzed": len(events),
+        "alerts_generated": len(alerts),
+        "severity_counts": ordered_severity_counts,
+        "rule_counts": count_by_alert_field(alerts, "rule"),
         "alerts": [asdict(alert) for alert in alerts],
     }
+
+
+def alert_sort_key(alert: Alert) -> tuple[int, str, str]:
+    try:
+        severity_rank = SEVERITY_ORDER.index(alert.severity)
+    except ValueError:
+        severity_rank = len(SEVERITY_ORDER)
+
+    return severity_rank, alert.rule, alert.ip
+
+
+def escape_markdown_table_value(value: str) -> str:
+    return value.replace("|", "\\|").replace("\n", " ")
+
+
+def render_markdown_report(events: list[AuthEvent], alerts: list[Alert]) -> str:
+    payload = build_report_payload(events, alerts)
+    lines = [
+        "# Authentication Log Analysis Report",
+        "",
+        "## Summary",
+        "",
+        f"- Events analyzed: {payload['events_analyzed']}",
+        f"- Alerts generated: {payload['alerts_generated']}",
+        "",
+        "## Alerts by Severity",
+        "",
+    ]
+
+    severity_counts = payload["severity_counts"]
+    if severity_counts:
+        for severity, count in severity_counts.items():
+            lines.append(f"- {severity}: {count}")
+    else:
+        lines.append("- No alerts found.")
+
+    lines.extend(["", "## Alerts by Rule", ""])
+    rule_counts = payload["rule_counts"]
+    if rule_counts:
+        for rule, count in rule_counts.items():
+            lines.append(f"- `{rule}`: {count}")
+    else:
+        lines.append("- No alerts found.")
+
+    lines.extend(
+        [
+            "",
+            "## Alert Details",
+            "",
+        ]
+    )
+
+    if alerts:
+        lines.extend(
+            [
+                "| Severity | Rule | IP | Username | Count | Message |",
+                "| --- | --- | --- | --- | --- | --- |",
+            ]
+        )
+        for alert in sorted(alerts, key=alert_sort_key):
+            username = alert.username if alert.username else "-"
+            count = str(alert.count) if alert.count is not None else "-"
+            lines.append(
+                "| "
+                f"{escape_markdown_table_value(alert.severity)} | "
+                f"`{escape_markdown_table_value(alert.rule)}` | "
+                f"{escape_markdown_table_value(alert.ip)} | "
+                f"{escape_markdown_table_value(username)} | "
+                f"{escape_markdown_table_value(count)} | "
+                f"{escape_markdown_table_value(alert.message)} |"
+            )
+    else:
+        lines.append("No alerts found.")
+
+    lines.extend(
+        [
+            "",
+            "## Rule Notes",
+            "",
+            "- `repeated_failed_logins` flags IP addresses with repeated failed login attempts.",
+            "- `suspicious_username` flags commonly targeted usernames.",
+            "- `success_after_failures` flags a successful login after repeated failures from the same IP.",
+            "",
+            "## Scope",
+            "",
+            "This report was generated from synthetic local authentication logs.",
+        ]
+    )
+
+    return "\n".join(lines) + "\n"
+
+
+def save_json(output_path: Path, events: list[AuthEvent], alerts: list[Alert]) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = build_report_payload(events, alerts)
     output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def save_markdown(output_path: Path, events: list[AuthEvent], alerts: list[Alert]) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(render_markdown_report(events, alerts), encoding="utf-8")
+
+
+def save_report(
+    output_path: Path, output_format: str, events: list[AuthEvent], alerts: list[Alert]
+) -> None:
+    if output_format == "json":
+        save_json(output_path, events, alerts)
+        return
+
+    save_markdown(output_path, events, alerts)
 
 
 def main() -> int:
@@ -195,8 +329,8 @@ def main() -> int:
     print_summary(events, alerts)
 
     if args.output:
-        save_json(args.output, events, alerts)
-        print(f"\nJSON report saved to {args.output}")
+        save_report(args.output, args.format, events, alerts)
+        print(f"\n{args.format.title()} report saved to {args.output}")
 
     return 0
 

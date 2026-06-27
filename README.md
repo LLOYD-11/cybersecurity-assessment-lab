@@ -1,6 +1,6 @@
 # Personal Cybersecurity Assessment Lab
 
-This project is a practical cybersecurity assessment lab. It currently demonstrates network reconnaissance, web vulnerability testing, and log-based detection, with planned reporting features.
+This project is a practical cybersecurity assessment lab. It currently demonstrates network reconnaissance, web vulnerability testing, log-based detection, and structured report output.
 
 The goal is not just to create isolated scripts. The goal is to build a small, explainable security lab where each module connects to a realistic security assessment process.
 
@@ -32,10 +32,11 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 - Suspicious username detection
 - Success-after-failures detection
 - JSON alert export
+- Markdown report generation
 
-## Planned Modules
+## Reports
 
-- `reports/` - Security assessment reports and demo outputs.
+- `reports/` - Sample security reports and generated demo outputs.
 
 ## Run Tests
 
@@ -63,7 +64,8 @@ cybersecurity_assessment_lab/
 
 ## Roadmap
 
-- Add report generation for summarizing findings and remediation guidance.
+- Add time-window based detection for repeated failed login attempts.
+- Add consolidated report output across multiple modules.
 
 ## Safety Boundary
 

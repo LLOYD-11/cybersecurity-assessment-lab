@@ -24,6 +24,12 @@ Save JSON output:
 python3 log_analyzer/analyzer.py log_analyzer/sample_logs/auth_sample.log --output reports/generated/auth_alerts.json
 ```
 
+Save Markdown report output:
+
+```bash
+python3 log_analyzer/analyzer.py log_analyzer/sample_logs/auth_sample.log --output reports/auth_log_analysis_sample.md --format markdown
+```
+
 ## Run Tests
 
 From the project root:
