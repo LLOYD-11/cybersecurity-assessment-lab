@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vulnerable Web App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="container">
+      <h1>Vulnerable Web App</h1>
+      <p>
+        This local demo compares an intentionally vulnerable login form with a
+        secure implementation that uses parameterized SQL queries.
+      </p>
+
+      <section class="card-grid">
+        <article class="card warning">
+          <h2>Vulnerable Login</h2>
+          <p>Uses unsafe SQL string formatting. This route is intentionally vulnerable.</p>
+          <a href="{{ url_for('vulnerable_login') }}">Open vulnerable demo</a>
+        </article>
+
+        <article class="card">
+          <h2>Secure Login</h2>
+          <p>Uses parameterized queries so user input cannot alter the SQL structure.</p>
+          <a href="{{ url_for('secure_login') }}">Open secure demo</a>
+        </article>
+      </section>
+
+      <section class="note">
+        <h2>Safety Boundary</h2>
+        <p>Run this app locally only. Do not deploy intentionally vulnerable code.</p>
+      </section>
+    </main>
+  </body>
+</html>

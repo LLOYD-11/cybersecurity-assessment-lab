@@ -7,10 +7,10 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 ## Current Modules
 
 - `recon/port_scanner/` - Network reconnaissance module written in Python.
+- `vulnerable_web_app/` - Local Flask app demonstrating SQL injection and remediation.
 
 ## Planned Modules
 
-- `vulnerable_web_app/` - A small intentionally vulnerable Flask application.
 - `log_analyzer/` - A simple log analysis and alerting tool.
 - `reports/` - Security assessment reports and demo outputs.
 

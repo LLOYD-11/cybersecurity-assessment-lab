@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="container">
+      <a class="back-link" href="{{ url_for('index') }}">Back to home</a>
+
+      <h1>{{ mode|title }} Login Result</h1>
+
+      <section class="card {{ 'success' if success else 'failure' }}">
+        <h2>{{ "Success" if success else "Failure" }}</h2>
+        <p>{{ message }}</p>
+      </section>
+
+      <section class="note">
+        <h2>SQL Query</h2>
+        <pre><code>{{ query }}</code></pre>
+      </section>
+    </main>
+  </body>
+</html>

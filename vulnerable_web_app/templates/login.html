@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ mode|title }} Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="container">
+      <a class="back-link" href="{{ url_for('index') }}">Back to home</a>
+
+      <h1>{{ mode|title }} Login</h1>
+
+      {% if mode == "vulnerable" %}
+        <p class="warning-text">
+          This form is intentionally vulnerable and is included only for local security learning.
+        </p>
+      {% else %}
+        <p>
+          This form uses parameterized SQL queries to keep user input separate from SQL structure.
+        </p>
+      {% endif %}
+
+      <form method="post" class="login-form">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" autocomplete="off" required>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required>
+
+        <button type="submit">Log in</button>
+      </form>
+
+      <section class="note">
+        <h2>Demo Account</h2>
+        <p><code>alice</code> / <code>password123</code></p>
+      </section>
+    </main>
+  </body>
+</html>
