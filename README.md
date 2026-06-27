@@ -1,6 +1,6 @@
 # Personal Cybersecurity Assessment Lab
 
-This project is a practical cybersecurity assessment lab. It currently demonstrates network reconnaissance and web vulnerability testing, with planned modules for log-based detection and reporting.
+This project is a practical cybersecurity assessment lab. It currently demonstrates network reconnaissance, web vulnerability testing, and log-based detection, with planned reporting features.
 
 The goal is not just to create isolated scripts. The goal is to build a small, explainable security lab where each module connects to a realistic security assessment process.
 
@@ -8,6 +8,7 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 
 - `recon/port_scanner/` - Network reconnaissance module written in Python.
 - `vulnerable_web_app/` - Local Flask app demonstrating SQL injection, XSS, and password hashing.
+- `log_analyzer/` - Command-line analyzer for suspicious authentication log patterns.
 
 ## Implemented Workflows
 
@@ -24,9 +25,16 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 - Cross-site scripting: unsafe rendering vs automatic HTML escaping
 - Password storage: plaintext password storage vs password hashing
 
+### Module 3: Log-Based Detection
+
+- Authentication log parsing
+- Repeated failed login detection
+- Suspicious username detection
+- Success-after-failures detection
+- JSON alert export
+
 ## Planned Modules
 
-- `log_analyzer/` - A simple log analysis and alerting tool.
 - `reports/` - Security assessment reports and demo outputs.
 
 ## Run Tests
@@ -36,6 +44,7 @@ From the project root:
 ```bash
 python3 -m unittest recon.port_scanner.test_scanner
 python3 -m unittest discover -s vulnerable_web_app -p 'test_*.py'
+python3 -m unittest log_analyzer.test_analyzer
 ```
 
 The web app tests require the dependencies in `vulnerable_web_app/requirements.txt`.
@@ -54,7 +63,6 @@ cybersecurity_assessment_lab/
 
 ## Roadmap
 
-- Add a log analyzer for detecting suspicious authentication and web request patterns.
 - Add report generation for summarizing findings and remediation guidance.
 
 ## Safety Boundary

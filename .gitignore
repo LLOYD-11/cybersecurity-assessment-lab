@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 venv/
 *.log
+!log_analyzer/sample_logs/*.log
 reports/generated/
 .local/
 vulnerable_web_app/demo.db

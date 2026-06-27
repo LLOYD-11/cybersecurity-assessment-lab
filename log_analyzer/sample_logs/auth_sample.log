@@ -1,0 +1,10 @@
+2026-06-27T10:00:01Z ip=203.0.113.10 user=admin action=failed
+2026-06-27T10:00:04Z ip=203.0.113.10 user=admin action=failed
+2026-06-27T10:00:07Z ip=203.0.113.10 user=admin action=failed
+2026-06-27T10:00:11Z ip=203.0.113.10 user=admin action=failed
+2026-06-27T10:00:15Z ip=203.0.113.10 user=admin action=failed
+2026-06-27T10:00:22Z ip=203.0.113.10 user=alice action=success
+2026-06-27T10:02:01Z ip=198.51.100.23 user=root action=failed
+2026-06-27T10:02:09Z ip=198.51.100.23 user=test action=failed
+2026-06-27T10:03:30Z ip=192.0.2.44 user=carol action=success
+invalid log line that should be ignored
