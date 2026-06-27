@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Auth Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="container">
+      <a class="back-link" href="{{ url_for('index') }}">Back to home</a>
+
+      <h1>{{ mode|title }} Auth Result</h1>
+
+      <section class="card {{ 'success' if success else 'failure' }}">
+        <h2>{{ "Success" if success else "Failure" }}</h2>
+        <p>{{ message }}</p>
+      </section>
+
+      {% if stored_value %}
+        <section class="note">
+          <h2>{{ stored_value_label }}</h2>
+          <pre><code>{{ stored_value }}</code></pre>
+        </section>
+      {% endif %}
+    </main>
+  </body>
+</html>

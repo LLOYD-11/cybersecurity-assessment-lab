@@ -76,6 +76,50 @@ class AppTests(unittest.TestCase):
         self.assertNotIn(payload, body)
         self.assertIn("&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;", body)
 
+    def test_weak_auth_login_accepts_valid_credentials_and_shows_plaintext(self) -> None:
+        response = self.client.post(
+            "/weak-auth-login",
+            data={
+                "username": "carol",
+                "password": "letmein123",
+            },
+        )
+
+        body = response.get_data(as_text=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Login successful. Welcome, carol.", body)
+        self.assertIn("Stored password", body)
+        self.assertIn("letmein123", body)
+
+    def test_secure_auth_login_accepts_valid_credentials_and_shows_hash(self) -> None:
+        response = self.client.post(
+            "/secure-auth-login",
+            data={
+                "username": "carol",
+                "password": "letmein123",
+            },
+        )
+
+        body = response.get_data(as_text=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Login successful. Welcome, carol.", body)
+        self.assertIn("Stored password hash", body)
+        self.assertNotIn("<code>letmein123</code>", body)
+
+    def test_secure_auth_login_rejects_wrong_password(self) -> None:
+        response = self.client.post(
+            "/secure-auth-login",
+            data={
+                "username": "carol",
+                "password": "wrong-password",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Login failed.", response.get_data(as_text=True))
+
 
 if __name__ == "__main__":
     unittest.main()

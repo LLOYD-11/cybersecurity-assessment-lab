@@ -2,7 +2,7 @@
 
 A small Flask application for demonstrating common web security issues in a local, controlled environment.
 
-The first demos focus on SQL injection in a login form and cross-site scripting in a comment preview. Each demo includes an intentionally vulnerable implementation and a secure implementation.
+The demos focus on SQL injection in a login form, cross-site scripting in a comment preview, and weak password storage. Each demo includes an intentionally vulnerable implementation and a secure implementation.
 
 ## What It Demonstrates
 
@@ -10,6 +10,8 @@ The first demos focus on SQL injection in a login form and cross-site scripting 
 - How parameterized queries prevent user input from changing SQL query structure.
 - How unescaped user input can create cross-site scripting risk.
 - How default HTML escaping prevents user input from being interpreted as markup or script.
+- Why plaintext password storage is dangerous.
+- How password hashing protects credentials if a database is exposed.
 - How to document a vulnerability with impact, evidence, and remediation.
 
 ## Setup
@@ -66,6 +68,15 @@ The vulnerable comment form can be tested locally with this XSS payload:
 
 The secure comment form should display the payload as text instead of interpreting it as HTML.
 
+The weak authentication form can be tested locally with:
+
+```text
+username: carol
+password: letmein123
+```
+
+The weak route displays the stored plaintext password. The secure route displays a password hash instead.
+
 ## Project Structure
 
 ```text
@@ -77,10 +88,13 @@ vulnerable_web_app/
 ├── test_database.py
 ├── docs/
 │   ├── sql_injection_walkthrough.md
+│   ├── weak_auth_walkthrough.md
 │   └── xss_walkthrough.md
 ├── static/
 │   └── style.css
 └── templates/
+    ├── auth_login.html
+    ├── auth_result.html
     ├── comment.html
     ├── index.html
     ├── login.html

@@ -38,6 +38,18 @@
           <p>Renders user input with automatic HTML escaping.</p>
           <a href="{{ url_for('secure_comment') }}">Open secure XSS demo</a>
         </article>
+
+        <article class="card warning">
+          <h2>Weak Auth Login</h2>
+          <p>Stores passwords as plaintext. This route is intentionally weak.</p>
+          <a href="{{ url_for('weak_auth_login') }}">Open weak auth demo</a>
+        </article>
+
+        <article class="card">
+          <h2>Secure Auth Login</h2>
+          <p>Stores password hashes and verifies passwords with Werkzeug.</p>
+          <a href="{{ url_for('secure_auth_login') }}">Open secure auth demo</a>
+        </article>
       </section>
 
       <section class="note">

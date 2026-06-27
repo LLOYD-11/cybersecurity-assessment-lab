@@ -60,6 +60,37 @@ class DatabaseTests(unittest.TestCase):
 
         self.assertIsNone(user)
 
+    def test_weak_auth_database_stores_plaintext_password(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_database = Path(temp_dir) / "demo.db"
+
+            with patch.object(database, "DATABASE_PATH", temp_database):
+                database.initialize_database()
+
+                with database.get_connection() as connection:
+                    user = connection.execute(
+                        "SELECT password FROM weak_auth_users WHERE username = ?",
+                        ("carol",),
+                    ).fetchone()
+
+        self.assertEqual(user["password"], "letmein123")
+
+    def test_secure_auth_database_stores_hash_not_plaintext(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_database = Path(temp_dir) / "demo.db"
+
+            with patch.object(database, "DATABASE_PATH", temp_database):
+                database.initialize_database()
+
+                with database.get_connection() as connection:
+                    user = connection.execute(
+                        "SELECT password_hash FROM secure_auth_users WHERE username = ?",
+                        ("carol",),
+                    ).fetchone()
+
+        self.assertNotEqual(user["password_hash"], "letmein123")
+        self.assertIn("scrypt:", user["password_hash"])
+
 
 if __name__ == "__main__":
     unittest.main()
