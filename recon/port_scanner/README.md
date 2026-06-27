@@ -13,14 +13,16 @@ A command-line TCP port scanner written in Python using only the standard librar
 
 ## Usage
 
+From the `cybersecurity_assessment_lab/` project root:
+
 ```bash
-python3 scanner.py <target> [options]
+python3 recon/port_scanner/scanner.py <target> [options]
 ```
 
 Example:
 
 ```bash
-python3 scanner.py scanme.nmap.org --start-port 1 --end-port 1024
+python3 recon/port_scanner/scanner.py scanme.nmap.org --start-port 1 --end-port 1024
 ```
 
 > `scanme.nmap.org` is a legal practice target provided by the Nmap project — safe to scan.
@@ -28,9 +30,9 @@ python3 scanner.py scanme.nmap.org --start-port 1 --end-port 1024
 Useful options:
 
 ```bash
-python3 scanner.py 127.0.0.1 --start-port 1 --end-port 100 --timeout 0.2 --workers 50
-python3 scanner.py 127.0.0.1 --start-port 1 --end-port 100 --output scan.json --format json
-python3 scanner.py 127.0.0.1 --start-port 1 --end-port 100 --output scan.csv --format csv
+python3 recon/port_scanner/scanner.py 127.0.0.1 --start-port 1 --end-port 100 --timeout 0.2 --workers 50
+python3 recon/port_scanner/scanner.py 127.0.0.1 --start-port 1 --end-port 100 --output reports/generated/scan.json --format json
+python3 recon/port_scanner/scanner.py 127.0.0.1 --start-port 1 --end-port 100 --output reports/generated/scan.csv --format csv
 ```
 
 ## Example output

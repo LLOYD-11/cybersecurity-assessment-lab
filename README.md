@@ -45,7 +45,8 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 
 ## Reports
 
-- `reports/` - Sample security reports and generated demo outputs.
+- `reports/final_assessment_report_sample.md` - Consolidated assessment report covering reconnaissance, web findings, detection, and response guidance.
+- `reports/auth_log_analysis_sample.md` - Authentication log analysis report generated from the sample log dataset.
 
 ## Run Tests
 
@@ -66,9 +67,19 @@ cybersecurity_assessment_lab/
 ├── README.md
 ├── recon/
 │   └── port_scanner/
+│       ├── scanner.py
+│       └── README.md
 ├── vulnerable_web_app/
+│   ├── app.py
+│   ├── database.py
+│   └── docs/
 ├── log_analyzer/
+│   ├── analyzer.py
+│   ├── sample_logs/
+│   └── docs/
 └── reports/
+    ├── final_assessment_report_sample.md
+    └── auth_log_analysis_sample.md
 ```
 
 ## Roadmap
