@@ -51,6 +51,31 @@ class AppTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Login failed.", response.get_data(as_text=True))
 
+    def test_vulnerable_comment_renders_raw_script_tag(self) -> None:
+        payload = "<script>alert('xss')</script>"
+
+        response = self.client.post(
+            "/vulnerable-comment",
+            data={"comment": payload},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(payload, response.get_data(as_text=True))
+
+    def test_secure_comment_escapes_script_tag(self) -> None:
+        payload = "<script>alert('xss')</script>"
+
+        response = self.client.post(
+            "/secure-comment",
+            data={"comment": payload},
+        )
+
+        body = response.get_data(as_text=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(payload, body)
+        self.assertIn("&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;", body)
+
 
 if __name__ == "__main__":
     unittest.main()

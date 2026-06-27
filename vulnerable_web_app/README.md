@@ -2,12 +2,14 @@
 
 A small Flask application for demonstrating common web security issues in a local, controlled environment.
 
-The first demo focuses on SQL injection in a login form. It includes both an intentionally vulnerable implementation and a secure implementation using parameterized queries.
+The first demos focus on SQL injection in a login form and cross-site scripting in a comment preview. Each demo includes an intentionally vulnerable implementation and a secure implementation.
 
 ## What It Demonstrates
 
 - How unsafe SQL string formatting can create authentication bypasses.
 - How parameterized queries prevent user input from changing SQL query structure.
+- How unescaped user input can create cross-site scripting risk.
+- How default HTML escaping prevents user input from being interpreted as markup or script.
 - How to document a vulnerability with impact, evidence, and remediation.
 
 ## Setup
@@ -47,7 +49,7 @@ password: password123
 
 ## Safe Local Demo
 
-The vulnerable login form can be tested locally with:
+The vulnerable login form can be tested locally with this SQL injection payload:
 
 ```text
 username: ' OR '1'='1' --
@@ -55,6 +57,14 @@ password: anything
 ```
 
 The secure login form should reject the same input.
+
+The vulnerable comment form can be tested locally with this XSS payload:
+
+```html
+<script>alert('xss')</script>
+```
+
+The secure comment form should display the payload as text instead of interpreting it as HTML.
 
 ## Project Structure
 
@@ -66,10 +76,12 @@ vulnerable_web_app/
 ├── test_app.py
 ├── test_database.py
 ├── docs/
-│   └── sql_injection_walkthrough.md
+│   ├── sql_injection_walkthrough.md
+│   └── xss_walkthrough.md
 ├── static/
 │   └── style.css
 └── templates/
+    ├── comment.html
     ├── index.html
     ├── login.html
     └── result.html

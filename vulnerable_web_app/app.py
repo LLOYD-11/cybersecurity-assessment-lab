@@ -74,6 +74,32 @@ def secure_login() -> str:
     )
 
 
+@app.route("/vulnerable-comment", methods=["GET", "POST"])
+def vulnerable_comment() -> str:
+    comment = ""
+    if request.method == "POST":
+        comment = request.form.get("comment", "")
+
+    return render_template(
+        "comment.html",
+        mode="vulnerable",
+        comment=comment,
+    )
+
+
+@app.route("/secure-comment", methods=["GET", "POST"])
+def secure_comment() -> str:
+    comment = ""
+    if request.method == "POST":
+        comment = request.form.get("comment", "")
+
+    return render_template(
+        "comment.html",
+        mode="secure",
+        comment=comment,
+    )
+
+
 def login_message(user: sqlite3.Row | None) -> str:
     if user is None:
         return "Login failed."

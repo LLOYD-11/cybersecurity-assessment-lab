@@ -26,6 +26,18 @@
           <p>Uses parameterized queries so user input cannot alter the SQL structure.</p>
           <a href="{{ url_for('secure_login') }}">Open secure demo</a>
         </article>
+
+        <article class="card warning">
+          <h2>Vulnerable Comment</h2>
+          <p>Renders user input without escaping. This route is intentionally vulnerable to XSS.</p>
+          <a href="{{ url_for('vulnerable_comment') }}">Open vulnerable XSS demo</a>
+        </article>
+
+        <article class="card">
+          <h2>Secure Comment</h2>
+          <p>Renders user input with automatic HTML escaping.</p>
+          <a href="{{ url_for('secure_comment') }}">Open secure XSS demo</a>
+        </article>
       </section>
 
       <section class="note">

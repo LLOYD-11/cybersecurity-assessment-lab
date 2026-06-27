@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ mode|title }} Comment</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    <main class="container">
+      <a class="back-link" href="{{ url_for('index') }}">Back to home</a>
+
+      <h1>{{ mode|title }} Comment</h1>
+
+      {% if mode == "vulnerable" %}
+        <p class="warning-text">
+          This form intentionally renders user input without escaping.
+        </p>
+      {% else %}
+        <p>
+          This form renders user input with Jinja's default HTML escaping.
+        </p>
+      {% endif %}
+
+      <form method="post" class="login-form">
+        <label for="comment">Comment</label>
+        <textarea id="comment" name="comment" rows="5" autocomplete="off"></textarea>
+        <button type="submit">Preview comment</button>
+      </form>
+
+      {% if comment %}
+        <section class="note">
+          <h2>Rendered Comment</h2>
+          {% if mode == "vulnerable" %}
+            <div class="rendered-comment">{{ comment|safe }}</div>
+          {% else %}
+            <div class="rendered-comment">{{ comment }}</div>
+          {% endif %}
+        </section>
+
+        <section class="note">
+          <h2>Original Input</h2>
+          <pre><code>{{ comment }}</code></pre>
+        </section>
+      {% endif %}
+    </main>
+  </body>
+</html>
