@@ -14,6 +14,14 @@ The demos focus on SQL injection in a login form, cross-site scripting in a comm
 - How password hashing protects credentials if a database is exposed.
 - How to document a vulnerability with impact, evidence, and remediation.
 
+## Demo Routes
+
+| Topic | Vulnerable Route | Secure Route | Secure Control |
+| --- | --- | --- | --- |
+| SQL injection | `/vulnerable-login` | `/secure-login` | Parameterized queries |
+| Cross-site scripting | `/vulnerable-comment` | `/secure-comment` | HTML escaping |
+| Password storage | `/weak-auth-login` | `/secure-auth-login` | Password hashing |
+
 ## Setup
 
 Create and activate a virtual environment from the project root:
@@ -27,13 +35,13 @@ pip install -r vulnerable_web_app/requirements.txt
 Initialize the demo database:
 
 ```bash
-python vulnerable_web_app/database.py
+python3 vulnerable_web_app/database.py
 ```
 
 Run the app:
 
 ```bash
-python vulnerable_web_app/app.py
+python3 vulnerable_web_app/app.py
 ```
 
 Open:
@@ -42,11 +50,16 @@ Open:
 http://127.0.0.1:5000
 ```
 
-## Demo Account
+## Demo Accounts
 
 ```text
 username: alice
 password: password123
+```
+
+```text
+username: carol
+password: letmein123
 ```
 
 ## Safe Local Demo
@@ -106,7 +119,7 @@ vulnerable_web_app/
 From the `cybersecurity_assessment_lab/` project root:
 
 ```bash
-python -m unittest discover -s vulnerable_web_app -p 'test_*.py'
+python3 -m unittest discover -s vulnerable_web_app -p 'test_*.py'
 ```
 
 ## Safety Boundary

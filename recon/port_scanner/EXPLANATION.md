@@ -30,7 +30,7 @@ A port scanner checks which TCP ports on a target accept connections. In securit
 
 This module demonstrates reconnaissance. The scanner does not exploit anything. It only identifies visible network services. In real security work, this helps define the attack surface and decide what should be investigated next.
 
-## Technical Summary
+## Module Summary
 
 This module can be summarized as follows:
 
