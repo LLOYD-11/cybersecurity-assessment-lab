@@ -36,6 +36,13 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 - Markdown report generation
 - MITRE ATT&CK mapping for brute-force style detections
 
+### Module 4: Assessment Reporting
+
+- Final assessment report sample
+- Finding severity, evidence, impact, and remediation
+- Incident response guidance for suspicious authentication activity
+- Consolidated workflow from reconnaissance to reporting
+
 ## Reports
 
 - `reports/` - Sample security reports and generated demo outputs.
@@ -67,7 +74,7 @@ cybersecurity_assessment_lab/
 ## Roadmap
 
 - Add time-window based detection for repeated failed login attempts.
-- Add consolidated report output across multiple modules.
+- Automate final report generation from structured module outputs.
 
 ## Safety Boundary
 
