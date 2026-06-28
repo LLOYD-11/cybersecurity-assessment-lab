@@ -311,6 +311,7 @@ def render_markdown_report(
     events: list[AuthEvent],
     alerts: list[Alert],
     window_minutes: int = DEFAULT_WINDOW_MINUTES,
+    demo_notes: list[str] | None = None,
 ) -> str:
     payload = build_report_payload(events, alerts, window_minutes)
     lines = [
@@ -386,7 +387,22 @@ def render_markdown_report(
         ]
     )
 
+    if demo_notes:
+        lines.extend(["", "## Demo Notes", ""])
+        lines.extend(f"- {note}" for note in demo_notes)
+
     return "\n".join(lines) + "\n"
+
+
+def demo_notes_for_log(log_file: Path) -> list[str]:
+    if log_file.name != "auth_window_demo.log":
+        return []
+
+    return [
+        "`203.0.113.50` has five failed logins within 60 minutes and triggers `repeated_failed_logins`.",
+        "`198.51.100.80` has five failed logins spread across more than 60 minutes, so it does not trigger `repeated_failed_logins`.",
+        "`192.0.2.77` has five failed logins followed by a successful login within 60 minutes and triggers `success_after_failures`.",
+    ]
 
 
 def save_json(
@@ -405,10 +421,12 @@ def save_markdown(
     events: list[AuthEvent],
     alerts: list[Alert],
     window_minutes: int = DEFAULT_WINDOW_MINUTES,
+    demo_notes: list[str] | None = None,
 ) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
-        render_markdown_report(events, alerts, window_minutes), encoding="utf-8"
+        render_markdown_report(events, alerts, window_minutes, demo_notes),
+        encoding="utf-8",
     )
 
 
@@ -418,12 +436,13 @@ def save_report(
     events: list[AuthEvent],
     alerts: list[Alert],
     window_minutes: int = DEFAULT_WINDOW_MINUTES,
+    demo_notes: list[str] | None = None,
 ) -> None:
     if output_format == "json":
         save_json(output_path, events, alerts, window_minutes)
         return
 
-    save_markdown(output_path, events, alerts, window_minutes)
+    save_markdown(output_path, events, alerts, window_minutes, demo_notes)
 
 
 def main() -> int:
@@ -442,7 +461,14 @@ def main() -> int:
     print_summary(events, alerts)
 
     if args.output:
-        save_report(args.output, args.format, events, alerts, args.window_minutes)
+        save_report(
+            args.output,
+            args.format,
+            events,
+            alerts,
+            args.window_minutes,
+            demo_notes_for_log(args.log_file),
+        )
         print(f"\n{args.format.title()} report saved to {args.output}")
 
     return 0

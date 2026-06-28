@@ -47,6 +47,7 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 
 - `reports/final_assessment_report_sample.md` - Consolidated assessment report covering reconnaissance, web findings, detection, and response guidance.
 - `reports/auth_log_analysis_sample.md` - Authentication log analysis report generated from the sample log dataset.
+- `reports/auth_window_demo_report.md` - Authentication log report showing sliding time-window detection behavior.
 
 ## Run Tests
 
@@ -79,7 +80,8 @@ cybersecurity_assessment_lab/
 │   └── docs/
 └── reports/
     ├── final_assessment_report_sample.md
-    └── auth_log_analysis_sample.md
+    ├── auth_log_analysis_sample.md
+    └── auth_window_demo_report.md
 ```
 
 ## Roadmap

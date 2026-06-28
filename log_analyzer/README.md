@@ -36,6 +36,12 @@ Change the detection window:
 python3 log_analyzer/analyzer.py log_analyzer/sample_logs/auth_sample.log --window-minutes 30
 ```
 
+Run the time-window demonstration dataset:
+
+```bash
+python3 log_analyzer/analyzer.py log_analyzer/sample_logs/auth_window_demo.log --output reports/auth_window_demo_report.md --format markdown
+```
+
 ## Run Tests
 
 From the project root:
@@ -53,7 +59,8 @@ log_analyzer/
 ├── docs/
 │   └── detection_rules.md
 └── sample_logs/
-    └── auth_sample.log
+    ├── auth_sample.log
+    └── auth_window_demo.log
 ```
 
 ## Safety Boundary
