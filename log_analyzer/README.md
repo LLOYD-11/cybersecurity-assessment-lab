@@ -6,9 +6,9 @@ This module focuses on blue-team detection logic. It parses authentication event
 
 ## What It Detects
 
-- Repeated failed login attempts from the same IP address.
+- Repeated failed login attempts from the same IP address within a sliding time window.
 - Suspicious usernames such as `admin`, `root`, and `test`.
-- A successful login after repeated failures from the same IP address.
+- A successful login after repeated failures from the same IP address within the same window.
 
 ## Usage
 
@@ -28,6 +28,12 @@ Save Markdown report output:
 
 ```bash
 python3 log_analyzer/analyzer.py log_analyzer/sample_logs/auth_sample.log --output reports/auth_log_analysis_sample.md --format markdown
+```
+
+Change the detection window:
+
+```bash
+python3 log_analyzer/analyzer.py log_analyzer/sample_logs/auth_sample.log --window-minutes 30
 ```
 
 ## Run Tests

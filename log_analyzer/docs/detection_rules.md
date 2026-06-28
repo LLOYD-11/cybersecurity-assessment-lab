@@ -17,13 +17,14 @@ Fields:
 - `user` - attempted username.
 - `action` - either `failed` or `success`.
 
-Invalid lines are ignored.
+Invalid lines and invalid timestamps are ignored.
 
 ## Rule: Repeated Failed Logins
 
 Trigger:
 
-- Same IP address has at least five failed login attempts.
+- Same IP address has at least five failed login attempts within the configured time window.
+- Default window: 60 minutes.
 
 Severity:
 
@@ -63,7 +64,8 @@ Framework mapping:
 
 Trigger:
 
-- Same IP address has at least five failures followed by a successful login.
+- Same IP address has at least five failures followed by a successful login within the configured time window.
+- Default window: 60 minutes.
 
 Severity:
 
@@ -78,10 +80,10 @@ Framework mapping:
 - [MITRE ATT&CK T1110 - Brute Force](https://attack.mitre.org/techniques/T1110/).
 - [MITRE ATT&CK T1110.001 - Password Guessing](https://attack.mitre.org/techniques/T1110/001/).
 
-## Current Limitations
+## Time Window Behavior
 
-The first version counts failed logins across the entire input file. It does not apply a sliding time window.
+Repeated-failure detections use a sliding time window. By default, the analyzer checks for five failed login attempts from the same IP address within 60 minutes.
 
-For example, five failed attempts from the same IP address will trigger the repeated-failures rule even if those failures are spread across a long time range.
+The `success_after_failures` rule uses the same window and only considers failures that occurred before the successful login.
 
-A production-style detector would usually apply a time window, such as "five failed logins from the same IP within one hour." This can be added in a later version by parsing timestamps and grouping events by time range.
+The window can be changed with the `--window-minutes` command-line option.

@@ -29,9 +29,9 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 ### Module 3: Log-Based Detection
 
 - Authentication log parsing
-- Repeated failed login detection
+- Sliding time-window based repeated failed login detection
 - Suspicious username detection
-- Success-after-failures detection
+- Success-after-failures detection within the configured time window
 - JSON alert export
 - Markdown report generation
 - MITRE ATT&CK mapping for brute-force style detections
@@ -84,7 +84,7 @@ cybersecurity_assessment_lab/
 
 ## Roadmap
 
-- Add time-window based detection for repeated failed login attempts.
+- Add service fingerprinting to the reconnaissance module.
 - Automate final report generation from structured module outputs.
 
 ## Safety Boundary

@@ -148,7 +148,7 @@ Store salted password hashes using a password hashing function designed for auth
 The authentication log analyzer generated a critical alert:
 
 ```text
-Successful login for 'alice' after 5 failures from 203.0.113.10.
+Successful login for 'alice' after 5 failures from 203.0.113.10 within 60 minutes.
 ```
 
 The same source IP also triggered a repeated failed login alert.
@@ -185,7 +185,7 @@ If a `success_after_failures` alert is triggered in a real environment:
 
 - The web application is intentionally vulnerable and designed for local testing only.
 - The authentication log dataset is synthetic.
-- The current repeated-failures rule counts failures across the full input file and does not yet apply a sliding time window.
+- The authentication log analyzer uses a configurable sliding time window, but the sample dataset is small and synthetic.
 - The network reconnaissance module identifies open ports but does not perform service fingerprinting or vulnerability exploitation.
 
 ## Conclusion

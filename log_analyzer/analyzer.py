@@ -5,12 +5,15 @@ import json
 import re
 from collections import defaultdict
 from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
 from pathlib import Path
 
 
 FAILED_THRESHOLD = 5
+DEFAULT_WINDOW_MINUTES = 60
 SUSPICIOUS_USERNAMES = {"admin", "root", "test", "guest"}
 SEVERITY_ORDER = ["critical", "high", "medium", "low"]
+TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 LOG_PATTERN = re.compile(
     r"^(?P<timestamp>\S+)\s+"
@@ -45,6 +48,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("log_file", type=Path, help="Path to an authentication log file.")
     parser.add_argument("--output", type=Path, help="Optional report output path.")
     parser.add_argument(
+        "--window-minutes",
+        type=int,
+        default=DEFAULT_WINDOW_MINUTES,
+        help=(
+            "Sliding time window for repeated-failure detection. "
+            f"Default: {DEFAULT_WINDOW_MINUTES}."
+        ),
+    )
+    parser.add_argument(
         "--format",
         choices=["json", "markdown"],
         default="json",
@@ -58,12 +70,23 @@ def parse_log_line(line: str) -> AuthEvent | None:
     if not match:
         return None
 
+    timestamp = match.group("timestamp")
+    if parse_timestamp(timestamp) is None:
+        return None
+
     return AuthEvent(
-        timestamp=match.group("timestamp"),
+        timestamp=timestamp,
         ip=match.group("ip"),
         username=match.group("username"),
         action=match.group("action"),
     )
+
+
+def parse_timestamp(timestamp: str) -> datetime | None:
+    try:
+        return datetime.strptime(timestamp, TIMESTAMP_FORMAT)
+    except ValueError:
+        return None
 
 
 def load_events(log_file: Path) -> list[AuthEvent]:
@@ -77,23 +100,60 @@ def load_events(log_file: Path) -> list[AuthEvent]:
     return events
 
 
-def detect_repeated_failures(events: list[AuthEvent]) -> list[Alert]:
-    failed_by_ip: dict[str, int] = defaultdict(int)
+def trim_old_failures(
+    failures: list[AuthEvent],
+    current_timestamp: datetime,
+    window: timedelta,
+) -> list[AuthEvent]:
+    window_start = current_timestamp - window
+    return [
+        event
+        for event in failures
+        if (parsed_timestamp := parse_timestamp(event.timestamp)) is not None
+        and parsed_timestamp >= window_start
+    ]
 
-    for event in events:
-        if event.action == "failed":
-            failed_by_ip[event.ip] += 1
 
+def sort_events_by_timestamp(events: list[AuthEvent]) -> list[AuthEvent]:
+    return sorted(events, key=lambda event: parse_timestamp(event.timestamp) or datetime.max)
+
+
+def detect_repeated_failures(
+    events: list[AuthEvent], window_minutes: int = DEFAULT_WINDOW_MINUTES
+) -> list[Alert]:
+    window = timedelta(minutes=window_minutes)
+    failures_by_ip: dict[str, list[AuthEvent]] = defaultdict(list)
+    alerted_ips: set[str] = set()
     alerts: list[Alert] = []
-    for ip, count in sorted(failed_by_ip.items()):
-        if count >= FAILED_THRESHOLD:
+
+    for event in sort_events_by_timestamp(events):
+        if event.action != "failed" or event.ip in alerted_ips:
+            continue
+
+        event_timestamp = parse_timestamp(event.timestamp)
+        if event_timestamp is None:
+            continue
+
+        recent_failures = trim_old_failures(
+            failures_by_ip[event.ip],
+            event_timestamp,
+            window,
+        )
+        recent_failures.append(event)
+        failures_by_ip[event.ip] = recent_failures
+
+        if len(recent_failures) >= FAILED_THRESHOLD:
+            alerted_ips.add(event.ip)
             alerts.append(
                 Alert(
                     rule="repeated_failed_logins",
                     severity="high",
-                    ip=ip,
-                    count=count,
-                    message=f"{count} failed login attempts from {ip}.",
+                    ip=event.ip,
+                    count=len(recent_failures),
+                    message=(
+                        f"{len(recent_failures)} failed login attempts from "
+                        f"{event.ip} within {window_minutes} minutes."
+                    ),
                 )
             )
 
@@ -104,7 +164,7 @@ def detect_suspicious_usernames(events: list[AuthEvent]) -> list[Alert]:
     seen: set[tuple[str, str]] = set()
     alerts: list[Alert] = []
 
-    for event in events:
+    for event in sort_events_by_timestamp(events):
         if event.username not in SUSPICIOUS_USERNAMES:
             continue
 
@@ -126,19 +186,39 @@ def detect_suspicious_usernames(events: list[AuthEvent]) -> list[Alert]:
     return alerts
 
 
-def detect_success_after_failures(events: list[AuthEvent]) -> list[Alert]:
-    failed_count_by_ip: dict[str, int] = defaultdict(int)
+def detect_success_after_failures(
+    events: list[AuthEvent], window_minutes: int = DEFAULT_WINDOW_MINUTES
+) -> list[Alert]:
+    window = timedelta(minutes=window_minutes)
+    failures_by_ip: dict[str, list[AuthEvent]] = defaultdict(list)
     alerted_ips: set[str] = set()
     alerts: list[Alert] = []
 
     for event in events:
-        if event.action == "failed":
-            failed_count_by_ip[event.ip] += 1
+        event_timestamp = parse_timestamp(event.timestamp)
+        if event_timestamp is None:
             continue
+
+        if event.action == "failed":
+            recent_failures = trim_old_failures(
+                failures_by_ip[event.ip],
+                event_timestamp,
+                window,
+            )
+            recent_failures.append(event)
+            failures_by_ip[event.ip] = recent_failures
+            continue
+
+        recent_failures = trim_old_failures(
+            failures_by_ip[event.ip],
+            event_timestamp,
+            window,
+        )
+        failures_by_ip[event.ip] = recent_failures
 
         if (
             event.action == "success"
-            and failed_count_by_ip[event.ip] >= FAILED_THRESHOLD
+            and len(recent_failures) >= FAILED_THRESHOLD
             and event.ip not in alerted_ips
         ):
             alerted_ips.add(event.ip)
@@ -148,10 +228,11 @@ def detect_success_after_failures(events: list[AuthEvent]) -> list[Alert]:
                     severity="critical",
                     ip=event.ip,
                     username=event.username,
-                    count=failed_count_by_ip[event.ip],
+                    count=len(recent_failures),
                     message=(
                         f"Successful login for '{event.username}' after "
-                        f"{failed_count_by_ip[event.ip]} failures from {event.ip}."
+                        f"{len(recent_failures)} failures from {event.ip} "
+                        f"within {window_minutes} minutes."
                     ),
                 )
             )
@@ -159,11 +240,13 @@ def detect_success_after_failures(events: list[AuthEvent]) -> list[Alert]:
     return alerts
 
 
-def analyze_events(events: list[AuthEvent]) -> list[Alert]:
+def analyze_events(
+    events: list[AuthEvent], window_minutes: int = DEFAULT_WINDOW_MINUTES
+) -> list[Alert]:
     alerts = []
-    alerts.extend(detect_repeated_failures(events))
+    alerts.extend(detect_repeated_failures(events, window_minutes))
     alerts.extend(detect_suspicious_usernames(events))
-    alerts.extend(detect_success_after_failures(events))
+    alerts.extend(detect_success_after_failures(events, window_minutes))
     return alerts
 
 
@@ -189,7 +272,11 @@ def count_by_alert_field(alerts: list[Alert], field_name: str) -> dict[str, int]
     return dict(sorted(counts.items()))
 
 
-def build_report_payload(events: list[AuthEvent], alerts: list[Alert]) -> dict[str, object]:
+def build_report_payload(
+    events: list[AuthEvent],
+    alerts: list[Alert],
+    window_minutes: int = DEFAULT_WINDOW_MINUTES,
+) -> dict[str, object]:
     severity_counts = count_by_alert_field(alerts, "severity")
     ordered_severity_counts = {
         severity: severity_counts[severity]
@@ -200,6 +287,7 @@ def build_report_payload(events: list[AuthEvent], alerts: list[Alert]) -> dict[s
     return {
         "events_analyzed": len(events),
         "alerts_generated": len(alerts),
+        "detection_window_minutes": window_minutes,
         "severity_counts": ordered_severity_counts,
         "rule_counts": count_by_alert_field(alerts, "rule"),
         "alerts": [asdict(alert) for alert in alerts],
@@ -219,8 +307,12 @@ def escape_markdown_table_value(value: str) -> str:
     return value.replace("|", "\\|").replace("\n", " ")
 
 
-def render_markdown_report(events: list[AuthEvent], alerts: list[Alert]) -> str:
-    payload = build_report_payload(events, alerts)
+def render_markdown_report(
+    events: list[AuthEvent],
+    alerts: list[Alert],
+    window_minutes: int = DEFAULT_WINDOW_MINUTES,
+) -> str:
+    payload = build_report_payload(events, alerts, window_minutes)
     lines = [
         "# Authentication Log Analysis Report",
         "",
@@ -228,6 +320,7 @@ def render_markdown_report(events: list[AuthEvent], alerts: list[Alert]) -> str:
         "",
         f"- Events analyzed: {payload['events_analyzed']}",
         f"- Alerts generated: {payload['alerts_generated']}",
+        f"- Detection window: {payload['detection_window_minutes']} minutes",
         "",
         "## Alerts by Severity",
         "",
@@ -283,9 +376,9 @@ def render_markdown_report(events: list[AuthEvent], alerts: list[Alert]) -> str:
             "",
             "## Rule Notes",
             "",
-            "- `repeated_failed_logins` flags IP addresses with repeated failed login attempts.",
+            "- `repeated_failed_logins` flags IP addresses with repeated failed login attempts inside the configured time window.",
             "- `suspicious_username` flags commonly targeted usernames.",
-            "- `success_after_failures` flags a successful login after repeated failures from the same IP.",
+            "- `success_after_failures` flags a successful login after repeated failures from the same IP inside the configured time window.",
             "",
             "## Scope",
             "",
@@ -296,25 +389,41 @@ def render_markdown_report(events: list[AuthEvent], alerts: list[Alert]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def save_json(output_path: Path, events: list[AuthEvent], alerts: list[Alert]) -> None:
+def save_json(
+    output_path: Path,
+    events: list[AuthEvent],
+    alerts: list[Alert],
+    window_minutes: int = DEFAULT_WINDOW_MINUTES,
+) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    payload = build_report_payload(events, alerts)
+    payload = build_report_payload(events, alerts, window_minutes)
     output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
-def save_markdown(output_path: Path, events: list[AuthEvent], alerts: list[Alert]) -> None:
+def save_markdown(
+    output_path: Path,
+    events: list[AuthEvent],
+    alerts: list[Alert],
+    window_minutes: int = DEFAULT_WINDOW_MINUTES,
+) -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(render_markdown_report(events, alerts), encoding="utf-8")
+    output_path.write_text(
+        render_markdown_report(events, alerts, window_minutes), encoding="utf-8"
+    )
 
 
 def save_report(
-    output_path: Path, output_format: str, events: list[AuthEvent], alerts: list[Alert]
+    output_path: Path,
+    output_format: str,
+    events: list[AuthEvent],
+    alerts: list[Alert],
+    window_minutes: int = DEFAULT_WINDOW_MINUTES,
 ) -> None:
     if output_format == "json":
-        save_json(output_path, events, alerts)
+        save_json(output_path, events, alerts, window_minutes)
         return
 
-    save_markdown(output_path, events, alerts)
+    save_markdown(output_path, events, alerts, window_minutes)
 
 
 def main() -> int:
@@ -325,11 +434,15 @@ def main() -> int:
         return 1
 
     events = load_events(args.log_file)
-    alerts = analyze_events(events)
+    if args.window_minutes <= 0:
+        print("Error: window minutes must be greater than 0")
+        return 1
+
+    alerts = analyze_events(events, args.window_minutes)
     print_summary(events, alerts)
 
     if args.output:
-        save_report(args.output, args.format, events, alerts)
+        save_report(args.output, args.format, events, alerts, args.window_minutes)
         print(f"\n{args.format.title()} report saved to {args.output}")
 
     return 0
