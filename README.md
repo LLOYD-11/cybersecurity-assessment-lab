@@ -9,6 +9,7 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 - `recon/port_scanner/` - Network reconnaissance module written in Python.
 - `vulnerable_web_app/` - Local Flask app demonstrating SQL injection, XSS, and password hashing.
 - `log_analyzer/` - Command-line analyzer for suspicious authentication log patterns.
+- `report_generator/` - Automated Markdown report generator for structured lab evidence.
 
 ## Implemented Workflows
 
@@ -39,12 +40,16 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 ### Module 4: Assessment Reporting
 
 - Final assessment report sample
+- Automated report generation from scanner output, log alerts, and curated web findings
 - Finding severity, evidence, impact, and remediation
+- Security control matrix
+- Evidence sources section
 - Incident response guidance for suspicious authentication activity
 - Consolidated workflow from reconnaissance to reporting
 
 ## Reports
 
+- `reports/automated_assessment_report_sample.md` - Generated assessment report created from structured scanner, log, and finding inputs.
 - `reports/final_assessment_report_sample.md` - Consolidated assessment report covering reconnaissance, web findings, detection, and response guidance.
 - `reports/auth_log_analysis_sample.md` - Authentication log analysis report generated from the sample log dataset.
 - `reports/auth_window_demo_report.md` - Authentication log report showing sliding time-window detection behavior.
@@ -57,6 +62,7 @@ From the project root:
 python3 -m unittest recon.port_scanner.test_scanner
 python3 -m unittest discover -s vulnerable_web_app -p 'test_*.py'
 python3 -m unittest log_analyzer.test_analyzer
+python3 -m unittest report_generator.test_generate_report
 ```
 
 The web app tests require the dependencies in `vulnerable_web_app/requirements.txt`.
@@ -78,7 +84,12 @@ cybersecurity_assessment_lab/
 │   ├── analyzer.py
 │   ├── sample_logs/
 │   └── docs/
+├── report_generator/
+│   ├── generate_report.py
+│   ├── findings.json
+│   └── README.md
 └── reports/
+    ├── automated_assessment_report_sample.md
     ├── final_assessment_report_sample.md
     ├── auth_log_analysis_sample.md
     └── auth_window_demo_report.md
@@ -87,7 +98,7 @@ cybersecurity_assessment_lab/
 ## Roadmap
 
 - Add service fingerprinting to the reconnaissance module.
-- Automate final report generation from structured module outputs.
+- Optionally export generated assessment reports to PDF.
 
 ## Safety Boundary
 

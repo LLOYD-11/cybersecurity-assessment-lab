@@ -1,0 +1,50 @@
+[
+  {
+    "id": "F-001",
+    "title": "SQL Injection in Vulnerable Login Flow",
+    "severity": "high",
+    "source_module": "vulnerable_web_app",
+    "category": "Web Application Security",
+    "evidence": "The vulnerable login route formats user input directly into a SQL query, allowing the payload `' OR '1'='1' --` to alter the query logic and bypass the password condition.",
+    "impact": "In a real application, this pattern could allow authentication bypass, unauthorized data access, data modification, or data deletion.",
+    "risk_summary": "Authentication bypass and unauthorized data access",
+    "remediation": "Use parameterized queries so user input is treated as data rather than SQL syntax.",
+    "control_summary": "Parameterized queries",
+    "verification": "The secure login route uses parameterized queries and rejects the same SQL injection payload.",
+    "references": [
+      "OWASP Top 10 A03:2021 - Injection"
+    ]
+  },
+  {
+    "id": "F-002",
+    "title": "Cross-Site Scripting in Vulnerable Comment Flow",
+    "severity": "medium",
+    "source_module": "vulnerable_web_app",
+    "category": "Web Application Security",
+    "evidence": "The vulnerable comment route renders untrusted input with Jinja's `safe` filter, allowing a submitted `<script>` payload to be interpreted by the browser.",
+    "impact": "In a real application, cross-site scripting could allow JavaScript execution in another user's browser, session theft, page modification, or actions performed as the victim.",
+    "risk_summary": "Browser-side script execution",
+    "remediation": "Keep template autoescaping enabled and do not mark untrusted user input as safe. If rich text is required, sanitize it with a strict allowlist.",
+    "control_summary": "Template escaping and input sanitization",
+    "verification": "The secure comment route uses default escaping and renders the script payload as text.",
+    "references": [
+      "OWASP Top 10 A03:2021 - Injection"
+    ]
+  },
+  {
+    "id": "F-003",
+    "title": "Plaintext Password Storage",
+    "severity": "high",
+    "source_module": "vulnerable_web_app",
+    "category": "Authentication Security",
+    "evidence": "The weak authentication flow stores and displays the raw password value for the demo account.",
+    "impact": "If a database storing plaintext passwords is exposed, every stored password is immediately compromised. Password reuse can increase the impact beyond the original application.",
+    "risk_summary": "Credential exposure after database compromise",
+    "remediation": "Store salted password hashes using a password hashing function designed for authentication. Never store plaintext passwords.",
+    "control_summary": "Salted password hashing",
+    "verification": "The secure authentication flow stores a salted Werkzeug password hash and verifies login attempts with `check_password_hash`.",
+    "references": [
+      "OWASP Top 10 A07:2021 - Identification and Authentication Failures"
+    ]
+  }
+]
