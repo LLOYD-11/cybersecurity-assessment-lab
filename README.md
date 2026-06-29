@@ -54,6 +54,27 @@ The goal is not just to create isolated scripts. The goal is to build a small, e
 - `reports/auth_log_analysis_sample.md` - Authentication log analysis report generated from the sample log dataset.
 - `reports/auth_window_demo_report.md` - Authentication log report showing sliding time-window detection behavior.
 
+## Reproduce Automated Report
+
+Generate local evidence files:
+
+```bash
+python3 recon/port_scanner/scanner.py 127.0.0.1 --start-port 1 --end-port 30 --timeout 0.1 --workers 20 --output reports/generated/localhost_scan.json --format json
+python3 log_analyzer/analyzer.py log_analyzer/sample_logs/auth_sample.log --output reports/generated/auth_alerts.json
+```
+
+Generate the automated assessment report:
+
+```bash
+python3 report_generator/generate_report.py \
+  --scan reports/generated/localhost_scan.json \
+  --auth reports/generated/auth_alerts.json \
+  --findings report_generator/findings.json \
+  --output reports/generated/final_assessment_report.md
+```
+
+The `reports/generated/` directory is ignored by Git. A committed sample output is available at `reports/automated_assessment_report_sample.md`.
+
 ## Run Tests
 
 From the project root:

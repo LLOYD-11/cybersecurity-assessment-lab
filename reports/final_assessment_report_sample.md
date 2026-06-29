@@ -192,4 +192,4 @@ If a `success_after_failures` alert is triggered in a real environment:
 
 This lab demonstrates a complete assessment workflow: identify exposed services, validate application-layer weaknesses, detect suspicious authentication behavior, and communicate findings with remediation and response guidance.
 
-The next improvement would be to automate report generation from scanner and analyzer outputs so the final assessment report can be regenerated from structured evidence.
+The lab also includes an automated report generator that can rebuild an assessment report from structured scanner output, authentication alerts, and curated web findings.

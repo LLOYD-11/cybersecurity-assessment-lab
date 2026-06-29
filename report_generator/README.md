@@ -14,6 +14,15 @@ The curated web findings are intentionally structured input for the report. This
 
 From the `cybersecurity_assessment_lab/` project root:
 
+First generate the structured evidence files used by the report generator:
+
+```bash
+python3 recon/port_scanner/scanner.py 127.0.0.1 --start-port 1 --end-port 30 --timeout 0.1 --workers 20 --output reports/generated/localhost_scan.json --format json
+python3 log_analyzer/analyzer.py log_analyzer/sample_logs/auth_sample.log --output reports/generated/auth_alerts.json
+```
+
+Then generate the assessment report:
+
 ```bash
 python3 report_generator/generate_report.py \
   --scan reports/generated/localhost_scan.json \
@@ -31,6 +40,8 @@ python3 report_generator/generate_report.py \
   --findings report_generator/findings.json \
   --output reports/automated_assessment_report_sample.md
 ```
+
+`reports/generated/` is ignored by Git, so generated working files stay local. The committed sample report in `reports/automated_assessment_report_sample.md` shows the expected output format.
 
 ## Finding Schema
 
